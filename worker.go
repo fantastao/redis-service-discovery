@@ -33,7 +33,7 @@ func (w *Worker) HeartBeat() {
 	w.Connect()
 	defer w.Close()
 
-	key := "test/" + w.Name
+	key := workerKeyPrefix + w.Name
 	_, err := w.conn.Do("HMSET", key, "addr", w.Address, "name", w.Name)
 	if err != nil {
 		log.Println(err)

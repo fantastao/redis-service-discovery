@@ -1,8 +1,25 @@
 package main
 
+import (
+	"sync"
+)
+
 func main() {
+	var wg sync.WaitGroup
+
 	master := NewMaster("test/*")
-	go master.WatchWorkers()
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		master.WatchWorkers()
+	}()
+
 	worker := NewWorker("worker", "localhost:1210")
-	worker.HeartBeat()
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		worker.HeartBeat()
+	}()
+
+	wg.Wait()
 }

@@ -34,7 +34,7 @@ func NewMaster(kp string) *Master {
 }
 
 func (m *Master) AddMember(channel string) {
-	key := strings.TrimPrefix(channel, "__keyspace@0__:")
+	key := strings.TrimPrefix(channel, keyspacePrefix)
 
 	// create new conn for m.conn is subscribing
 	c, err := NewConn()
@@ -49,14 +49,20 @@ func (m *Master) AddMember(channel string) {
 	name := r["name"]
 	addr := r["addr"]
 	m.members[name] = &Member{Name: name, Addr: addr}
+
+	log.Println(m.members)
 }
 
 func (m *Master) RmMember(channel string) {
-	// TODO pass
+	key := strings.TrimPrefix(channel, keyspacePrefix)
+	name := strings.TrimPrefix(key, workerKeyPrefix)
+	delete(m.members, name)
+
+	log.Println(m.members)
 }
 
 func (m *Master) WatchWorkers() {
-	channel := "__keyspace@0__:" + m.keyspacePattern
+	channel := keyspacePrefix + m.keyspacePattern
 	psc := redis.PubSubConn{Conn: m.conn}
 	psc.PSubscribe(channel)
 
